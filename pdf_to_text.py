@@ -5,6 +5,7 @@ from wand.image import Image
 import os
 import time
 import codecs
+import pdb
 
 
 class Pdf_to_txt:
@@ -23,7 +24,7 @@ class Pdf_to_txt:
 
     def main_flow(self):
 
-        for self.each_file in os.listdir(self.filedir):
+        for self.each_file in sorted(os.listdir(self.filedir)):
             if self.each_file.endswith("pdf"):
                 final_path = self.output_path + self.each_file.split(".")[0] + "\\"
                 if os.path.isdir(final_path):
@@ -43,16 +44,23 @@ class Pdf_to_txt:
         self.execute_main()
 
     def execute_main(self):
-        for self.each_file in os.listdir(self.output_path):
-            for each_sub in os.listdir(self.output_path + self.each_file):
-                final_path = self.output_path + self.each_file +"\\"+each_sub
-                self.execute(final_path)
+        temp = []
+        for self.each_file in sorted(os.listdir(self.output_path)):
+            for each_sub in sorted(os.listdir(self.output_path + self.each_file)):
+                temp.append(int(each_sub.split(".")[0]))
+                temp = sorted(temp)
+            for self.each_file in sorted(os.listdir(self.output_path)):
+                for index,each_sub in enumerate(os.listdir(self.output_path + self.each_file)):
+                    final_path = self.output_path + self.each_file +"\\"+str(temp[index]) + ".jpeg"
+                    # pdb.set_trace()
+                    self.execute(final_path)
         print("\n Completed Converting the Input files")
         print("\n Output is present at {}".format(self.output_path))
         self.driver.close()
 
     def execute(self,final_path):
         try:
+
             print("\n Starting the driver")
             print("\n Getting the website")
             self.driver.get(self.url)
@@ -73,7 +81,8 @@ class Pdf_to_txt:
             time.sleep(2)
             conv_txt = self.driver.find_element_by_xpath('//*[@id="scrollstart"]/div[1]/div[3]/div[2]/span')
             self.data = [conv_txt.text]
-            self.write_output(final_path)
+            if self.data:
+                self.write_output(final_path)
         except Exception as e:
             print("Exception Occured during Browser activity", e)
             self.driver.close()
