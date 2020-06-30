@@ -1,6 +1,7 @@
 from pdf2image import convert_from_path
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
+from wand.image import Image
 import os
 import time
 import codecs
@@ -15,8 +16,9 @@ class Pdf_to_txt:
         self.url = url
         options  = Options()
         options.headless  = True
-        self.driver = webdriver.Chrome(driver_path)
-        self.driver.maximize_window()
+        self.driver = webdriver.Chrome(driver_path,options=options)
+        # self.driver.maximize_window()
+        # self.driver.minimize_window()
         self.main_flow()
 
     def main_flow(self):
@@ -24,12 +26,20 @@ class Pdf_to_txt:
         for self.each_file in os.listdir(self.filedir):
             if self.each_file.endswith("pdf"):
                 final_path = self.output_path + self.each_file.split(".")[0] + "\\"
-                os.mkdir(final_path)
+                if os.path.isdir(final_path):
+                    pass
+                else:
+                    os.mkdir(final_path)
                 final_input_path = self.filedir + self.each_file
-                pages = convert_from_path(final_input_path, poppler_path=self.poppler_path, output_file=final_path)
-                for number,page in enumerate(pages):
-                    page.save(final_path + "{}.jpeg".format(number), 'JPEG')
-                    print("\n Saving converted image ---->" + final_path + "{}.jpeg".format(number))
+                # pages = convert_from_path(final_input_path, poppler_path=self.poppler_path, output_file=final_path)
+                # for number,page in enumerate(pages):
+                #     page.save(final_path + "{}.jpeg".format(number), 'JPEG')
+                #     print("\n Saving converted image ---->" + final_path + "{}.jpeg".format(number))
+                pages = Image(filename=final_input_path, resolution=150)
+                for number, page in enumerate(pages.sequence):
+                    with Image(page)as img:
+                        img.save(filename=final_path + "{}.jpeg".format(number))
+                        print("\n Saving converted image ---->" + final_path + "{}.jpeg".format(number))
         self.execute_main()
 
     def execute_main(self):
@@ -55,6 +65,7 @@ class Pdf_to_txt:
             self.driver.find_element_by_xpath("//*[@id='scrollstart']/div[1]/div[1]/div[4]/span/button").click()
             time.sleep(2)
             self.driver.find_element_by_xpath("//*[@id='scrollstart']/div[1]/div[3]/div[1]/div/i").click()
+            time.sleep(3)
             lang = self.driver.find_element_by_xpath("/html/body/div[4]/div[1]/div[2]/div/input")
             lang.send_keys("Telugu")
             time.sleep(2)
