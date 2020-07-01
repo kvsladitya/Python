@@ -94,7 +94,7 @@ class Pdf_to_txt:
             if self.data:
                 self.text_to_filewrite()
             end = time.time()
-            hours, rem = divmod(end - self.start, 3600)
+            hours, rem = divmod(end - start, 3600)
             minutes, seconds = divmod(rem, 60)
             print("Selenium Function block took {:0>2}:{:0>2}:{:05.2f} to execute".format(int(hours), int(minutes),
                                                                                           seconds))
